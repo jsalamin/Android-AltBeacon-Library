@@ -11,6 +11,7 @@ using Android.Graphics;
 using Android.OS;
 using Android.Util;
 using Android.Widget;
+using Android.Support.V4.App;
 
 namespace AndroidAltBeaconLibrary.Sample
 {
@@ -21,6 +22,8 @@ namespace AndroidAltBeaconLibrary.Sample
 		Icon = "@drawable/altbeacon")]
 	public class MainActivity : Activity, IDialogInterfaceOnDismissListener, IBeaconConsumer
 	{
+		private const string TAG = "AndroidProximityReferenceApplication";
+		
 		private readonly RangeNotifier _rangeNotifier;
 
 		AltBeaconOrg.BoundBeacon.Region _tagRegion, _emptyRegion;
@@ -32,6 +35,7 @@ namespace AndroidAltBeaconLibrary.Sample
 
 		public MainActivity()
 		{
+			Log.Debug(TAG, "MainActivity()");
 			_rangeNotifier = new RangeNotifier();
 			_data = new List<Beacon>();
 		}
@@ -39,6 +43,8 @@ namespace AndroidAltBeaconLibrary.Sample
 		protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
+
+			Log.Debug(TAG, "MainActivity.OnCreate");
 
 			SetContentView(Resource.Layout.MainActivity);
 
@@ -83,24 +89,27 @@ namespace AndroidAltBeaconLibrary.Sample
 			VerityBluetooth();
 
 			_beaconManager = BeaconManager.GetInstanceForApplication(this);
-//			// By default the AndroidBeaconLibrary will only find AltBeacons.  If you wish to make it
-//			// find a different type of beacon, you must specify the byte layout for that beacon's
-//			// advertisement with a line like below.  The example shows how to find a beacon with the
-//			// same byte layout as AltBeacon but with a beaconTypeCode of 0xaabb
-//			//
-//			// beaconManager.getBeaconParsers().add(new BeaconParser().
-//			//        setBeaconLayout("m:2-3=aabb,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-//			//
-//			// In order to find out the proper BeaconLayout definition for other kinds of beacons, do
-//			// a Google search for "setBeaconLayout" (including the quotes in your search.)
-//
-			var iBeaconParser = new BeaconParser();
-			//	Estimote > 2013
-			iBeaconParser.SetBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24");
-			_beaconManager.BeaconParsers.Add(iBeaconParser);
+			//			// By default the AndroidBeaconLibrary will only find AltBeacons.  If you wish to make it
+			//			// find a different type of beacon, you must specify the byte layout for that beacon's
+			//			// advertisement with a line like below.  The example shows how to find a beacon with the
+			//			// same byte layout as AltBeacon but with a beaconTypeCode of 0xaabb
+			//			//
+			//			// beaconManager.getBeaconParsers().add(new BeaconParser().
+			//			//        setBeaconLayout("m:2-3=aabb,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
+			//			//
+			//			// In order to find out the proper BeaconLayout definition for other kinds of beacons, do
+			//			// a Google search for "setBeaconLayout" (including the quotes in your search.)
+			//
+			if (_beaconManager.BeaconParsers.Count == 0)
+			{
+				var iBeaconParser = new BeaconParser();
+				//	Estimote > 2013
+				iBeaconParser.SetBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24");
+				_beaconManager.BeaconParsers.Add(iBeaconParser);
+			}
 
 			_beaconManager.Bind(this);
-//			_beaconManager.SetBackgroundMode(false);
+			//_beaconManager.SetBackgroundMode(false);
 
 			_rangeNotifier.DidRangeBeaconsInRegionComplete += RangingBeaconsInRegion;
 		}
@@ -297,15 +306,16 @@ namespace AndroidAltBeaconLibrary.Sample
 
 		public void OnBeaconServiceConnect()
 		{
-			_beaconManager.SetForegroundBetweenScanPeriod(5000); // 5000 milliseconds
+			_beaconManager.SetForegroundBetweenScanPeriod(1000); // 5000 milliseconds
+			_beaconManager.SetBackgroundBetweenScanPeriod(1000);
 
 			_beaconManager.SetRangeNotifier(_rangeNotifier);
 
-			_tagRegion = new AltBeaconOrg.BoundBeacon.Region("myUniqueBeaconId", Identifier.Parse("2F234454-CF6D-4A0F-ADF2-F4911BA9FFA6"), null, null);
-			_emptyRegion = new AltBeaconOrg.BoundBeacon.Region("myEmptyBeaconId", null, null, null);
+			_tagRegion = new AltBeaconOrg.BoundBeacon.Region("myUniqueBeaconId", Identifier.Parse("11111111-2222-2222-3333-444444444444"), null, null);
+			//_emptyRegion = new AltBeaconOrg.BoundBeacon.Region("myEmptyBeaconId", null, null, null);
 
 			_beaconManager.StartRangingBeaconsInRegion(_tagRegion);
-			_beaconManager.StartRangingBeaconsInRegion(_emptyRegion);
+			//_beaconManager.StartRangingBeaconsInRegion(_emptyRegion);
 
 			_startButton.Enabled = false;
 		}

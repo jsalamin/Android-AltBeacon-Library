@@ -35,6 +35,7 @@ namespace AndroidAltBeaconLibrary.Sample
 		{
 			base.OnCreate();
 
+			Log.Debug(TAG, "BeaconReferenceApplication.OnCreate");
 			_beaconManager = BeaconManager.GetInstanceForApplication(this);
 
 			var iBeaconParser = new BeaconParser();
@@ -44,24 +45,25 @@ namespace AndroidAltBeaconLibrary.Sample
 
 			Log.Debug(TAG, "setting up background monitoring for beacons and power saving");
 			// wake up the app when a beacon is seen
-			_backgroundRegion = new Region("backgroundRegion", null, null, null);
+			_backgroundRegion = new Region("backgroundRegion", Identifier.Parse("11111111-2222-2222-3333-444444444444"), null, null);
 			regionBootstrap = new RegionBootstrap(this, _backgroundRegion);
 
 			// simply constructing this class and holding a reference to it in your custom Application
 			// class will automatically cause the BeaconLibrary to save battery whenever the application
 			// is not visible.  This reduces bluetooth power usage by about 60%
-			backgroundPowerSaver = new BackgroundPowerSaver(this);
+			//backgroundPowerSaver = new BackgroundPowerSaver(this);
 		}
 
 		public void DidDetermineStateForRegion(int state, AltBeaconOrg.BoundBeacon.Region region)
 		{
+			Log.Debug(TAG, "BeaconReferenceApplication.DidDetermineStateForRegion");
 		}
 
 		public void DidEnterRegion(AltBeaconOrg.BoundBeacon.Region region)
 		{
 			// In this example, this class sends a notification to the user whenever a Beacon
 			// matching a Region (defined above) are first seen.
-			Log.Debug(TAG, "did enter region.");
+			Log.Debug(TAG, "BeaconReferenceApplication.DidEnterRegion");
 			if (!haveDetectedBeaconsSinceBoot) 
 			{
 				Log.Debug(TAG, "auto launching MonitoringActivity");
@@ -74,6 +76,7 @@ namespace AndroidAltBeaconLibrary.Sample
 				// to keep multiple copies of this activity from getting created if the user has
 				// already manually launched the app.
 				this.StartActivity(intent);
+				//SendNotification();
 				haveDetectedBeaconsSinceBoot = true;
 			} 
 			else 
